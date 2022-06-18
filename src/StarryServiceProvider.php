@@ -4,7 +4,7 @@ namespace Ssmalik99\Repostarry;
 
 use Illuminate\Support\ServiceProvider;
 
-class RepoStarryServiceProvider extends ServiceProvider
+class StarryServiceProvider extends ServiceProvider
 {
     /**
      * Register services.
@@ -28,6 +28,7 @@ class RepoStarryServiceProvider extends ServiceProvider
             $this->commands([
                 StarryInitCommand::class,
                 StarryMakeCommand::class,
+                StarryInterfaceCommand::class
             ]);
         }
 

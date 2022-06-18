@@ -9,7 +9,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 // use Illuminate\Console\Command;
 
-#[AsCommand(name: 'make:starry')]
+#[AsCommand(name: 'starry:interface')]
 class StarryInterfaceCommand extends GeneratorCommand
 {
 
@@ -47,7 +47,7 @@ class StarryInterfaceCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $type = 'Repository';
+    protected $type = 'interface';
 
     /**
      * Get the stub file for the generator.
@@ -57,22 +57,15 @@ class StarryInterfaceCommand extends GeneratorCommand
 
     protected function getStub()
     {
-        $repositoryStub = null;
-        $interfaceStup = null;
+        $stub = null;
         
         if ($this->option('model')) {
-            $repositoryStub = '/stubs/starry.repository.model.stub';
-            $interfaceStup = "/stubs/starry.interface.model.stub";
+            $stub = "/stubs/starry.interface.model.stub";
         }
 
-        $repositoryStub ??= '/stubs/starry.repository.stub';
-        $interfaceStup ??= "/stubs/starry.interface.stub";
+        $stub ??= "/stubs/starry.interface.stub";
 
-        return $this->resolveStubPath($repositoryStub);
-        // return [
-        //     "repositoryStub" => $this->resolveStubPath($repositoryStub),
-        //     "interfaceStup" => $this->resolveStubPath($interfaceStup)
-        // ];
+        return $this->resolveStubPath($stub);
     }
 
     
@@ -84,7 +77,7 @@ class StarryInterfaceCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\\Repository\\'.config('starry.starry_repository_path');
+        return $rootNamespace.'\\Repository\\'.config('starry.starry_interfaces_path');
     }
 
     /**
@@ -97,7 +90,7 @@ class StarryInterfaceCommand extends GeneratorCommand
      */
     protected function buildClass($name)
     {
-        $repositoryNamespace = $this->getNamespace($name);
+        $interfaceNamespace = $this->getNamespace($name);
 
         $replace = [];
 
@@ -105,7 +98,7 @@ class StarryInterfaceCommand extends GeneratorCommand
             $replace = $this->buildModelReplacements();
         }
 
-        $replace["use {$repositoryNamespace}\Repository;\n"] = '';
+        $replace["use {$interfaceNamespace}\Repository;\n"] = '';
 
         return str_replace(
             array_keys($replace), array_values($replace), parent::buildClass($name)
@@ -182,7 +175,41 @@ class StarryInterfaceCommand extends GeneratorCommand
                         ? $customPath
                         : __DIR__.$stub;
     }
+    
+    public function basicSetupImplemented()
+    {
+        $basicSetupClasses = [
+            [
+                "name" => "App\\Providers\\RepositoryServiceProvider",
+                "type" => "provider",
+            ],
+            [
+                "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
+                "type" => "interface",
+            ],
+            [
+                "name" => "App\\Repository\\".config('starry.starry_repository_path')."\\"."BaseRepository",
+                "type" => "class",
+            ],
+        ];
+        foreach ($basicSetupClasses as $setup) {
+            switch ($setup["type"]) {
+                case 'interface':
+                    if (!interface_exists($setup["name"])) {
+                        return false;
+                    }
+                    break;
+                
+                default:
+                    if (!class_exists($setup["name"])) {
+                        return false;
+                    }
+                    break;
+            }
 
+            return true;
+        }
+    }
 
     /**
      * Execute the console command.
@@ -191,6 +218,11 @@ class StarryInterfaceCommand extends GeneratorCommand
      */
     public function handle()
     {
+        if(!$this->basicSetupImplemented()):
+            $this->error("Basic setup is not done for the starry.");
+            $this->info("Use Command \n php artisan starry:launch \n to make a basic setup.");
+            return;
+        endif;
         // First we need to ensure that the given name is not a reserved word within the PHP
         // language and that the class name will actually be valid. If it is not valid we
         // can error now and prevent from polluting the filesystem using invalid files.

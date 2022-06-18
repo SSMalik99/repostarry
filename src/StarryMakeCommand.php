@@ -9,7 +9,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 // use Illuminate\Console\Command;
 
-#[AsCommand(name: 'make:starry')]
+#[AsCommand(name: 'starry:repo')]
 class StarryMakeCommand extends GeneratorCommand
 {
 
@@ -21,7 +21,7 @@ class StarryMakeCommand extends GeneratorCommand
     *
     * @var string
     */
-    protected $name = 'make:starry';
+    protected $name = 'starry:repo';
 
     
     /**
@@ -34,7 +34,7 @@ class StarryMakeCommand extends GeneratorCommand
      * @deprecated
      */
     // protected $signature = 'make:starry';
-    protected static $defaultName = 'make:starry';
+    protected static $defaultName = 'starry:repo';
 
     /**
      * The console command description.
@@ -55,6 +55,44 @@ class StarryMakeCommand extends GeneratorCommand
      *
      * @return string
      */
+
+
+    public function basicSetupImplemented()
+    {
+        $basicSetupClasses = [
+            [
+                "name" => "App\\Providers\\RepositoryServiceProvider",
+                "type" => "provider",
+            ],
+            [
+                "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
+                "type" => "interface",
+            ],
+            [
+                "name" => "App\\Repository\\".config('starry.starry_repository_path')."\\"."BaseRepository",
+                "type" => "class",
+            ],
+        ];
+        foreach ($basicSetupClasses as $setup) {
+            switch ($setup["type"]) {
+                case 'interface':
+                    if (!interface_exists($setup["name"])) {
+                        return false;
+                    }
+                    break;
+                
+                default:
+                    if (!class_exists($setup["name"])) {
+                        return false;
+                    }
+                    break;
+            }
+
+            return true;
+        }
+    }
+
+
 
     protected function getStub()
     {
@@ -192,6 +230,12 @@ class StarryMakeCommand extends GeneratorCommand
      */
     public function handle()
     {
+        if(!$this->basicSetupImplemented()):
+            $this->error("Basic setup is not done for the starry.");
+            $this->info("Use Command \n php artisan starry:launch \n to make a basic setup.");
+            return;
+        endif;
+        
         // First we need to ensure that the given name is not a reserved word within the PHP
         // language and that the class name will actually be valid. If it is not valid we
         // can error now and prevent from polluting the filesystem using invalid files.

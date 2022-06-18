@@ -11,7 +11,7 @@
     "extra": {
         "laravel" : {
             "providers" : [
-                "Ssmalik99\\Repostarry\\RepoStarryServiceProvider"
+                "Ssmalik99\\Repostarry\\StarryServiceProvider"
             ]
         }
     },
