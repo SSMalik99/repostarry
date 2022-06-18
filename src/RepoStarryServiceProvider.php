@@ -23,6 +23,22 @@ class RepoStarryServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                StarryInitCommand::class,
+                StarryMakeCommand::class,
+            ]);
+        }
+
+
+        $this->publishes([
+            __DIR__.'/../config/starry.php' => config_path('starry.php')
+        ], 'starry-config');
+
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/starry.php', 'starry'
+        );
     }
+
 }
