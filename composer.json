@@ -1,0 +1,32 @@
+{
+    "name": "ssmalik99/repostarry",
+    "description": "This is a helper package to create Repository system usage easy for laravel users",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Ssmalik99\\Repostarry\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Saravjeet Singh",
+            "email": "saravjeetsingh.malik@gmail.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Sajeed Kannoje",
+            "role": "Developer"
+        },
+        {
+            "name": "Preeti Gupta",
+            "role": "Manager"
+        },
+        {
+            "name": "Kamaljeet Kaur",
+            "role": "Financer"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
