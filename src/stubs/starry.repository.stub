@@ -2,7 +2,7 @@
 
 namespace {{ namespace }};
 
-use {{ interfaceNameSapce }}
+use {{ interfaceNameSapce }};
 use Illuminate\Database\Eloquent\Model;
 use {{ BaseRepoPath }}\BaseRepository;
 
