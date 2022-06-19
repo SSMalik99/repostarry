@@ -51,7 +51,8 @@ class StarryServiceProvider extends ServiceProvider
         ], 'starry-config');
 
         $this->mergeConfigFrom(
-            __DIR__.'/../config/starry.php', 'starry'
+            __DIR__.'/../config/starry.php', 
+            'starry'
         );
     }
 

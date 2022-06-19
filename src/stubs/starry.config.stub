@@ -23,5 +23,5 @@ return [
     */
     "starry_repository_path" => env("STARRY_REPOSITORY_PATH", "Eloquent"),
 
-    "bindings" => {{ bindings }}
+    {{ bindings }}
 ];

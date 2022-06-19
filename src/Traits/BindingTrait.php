@@ -7,7 +7,7 @@ namespace Ssmalik99\Repostarry\Traits;
  */
 trait BindingTrait
 {
-    public function mergeBinding(array $bindings)
+    public function mergeBinding(array $bindings = [])
     {
         $filePath = config_path('starry.php');
         $content = config('starry.bindings');
@@ -15,7 +15,7 @@ trait BindingTrait
         if($this->files->missing($filePath)):
             $content = [];
         endif;
-
+        $content = $content ?? [];
         $content = array_merge($content, $bindings);
 
         $stub = $this->resolveStubPath("/stubs/starry.config.stub");
@@ -27,7 +27,8 @@ trait BindingTrait
         }
 
         $stub = str_replace('{{ bindings }}', $bindingString, $stub);
-        $this->files->putContent($filePath, $stub);
+        dd($stub);
+        $this->files->put($filePath, $stub);
         
     }
 }
