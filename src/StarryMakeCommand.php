@@ -9,7 +9,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 // use Illuminate\Console\Command;
 
-#[AsCommand(name: 'make:starry')]
+#[AsCommand(name: 'starry:make')]
 class StarryMakeCommand extends GeneratorCommand
 {
 
@@ -21,7 +21,7 @@ class StarryMakeCommand extends GeneratorCommand
     *
     * @var string
     */
-    protected $name = 'make:starry';
+    protected $name = 'starry:make';
 
     
     /**
@@ -33,8 +33,8 @@ class StarryMakeCommand extends GeneratorCommand
      *
      * @deprecated
      */
-    // protected $signature = 'make:starry';
-    protected static $defaultName = 'make:starry';
+    // protected $signature = 'starry:make';
+    protected static $defaultName = 'starry:make';
 
     /**
      * The console command description.
@@ -62,7 +62,7 @@ class StarryMakeCommand extends GeneratorCommand
         $basicSetupClasses = [
             [
                 "name" => "App\\Providers\\RepositoryServiceProvider",
-                "type" => "provider",
+                "type" => "class",
             ],
             [
                 "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
@@ -73,23 +73,27 @@ class StarryMakeCommand extends GeneratorCommand
                 "type" => "class",
             ],
         ];
-        foreach ($basicSetupClasses as $setup) {
-            switch ($setup["type"]) {
-                case 'interface':
-                    if (!interface_exists($setup["name"])) {
-                        return false;
-                    }
-                    break;
-                
-                default:
-                    if (!class_exists($setup["name"])) {
-                        return false;
-                    }
-                    break;
+        try {
+            foreach ($basicSetupClasses as $setup) {
+                switch ($setup["type"]) {
+                    case 'interface':
+                        if (!interface_exists($setup["name"])) {
+                            return false;
+                        }
+                        break;
+                    
+                    case "class":
+                        if (!class_exists($setup["name"])) {
+                            
+                            return false;
+                        }                   
+                        break;
+                }
             }
-
-            return true;
+        } catch (\Throwable $th) {
+            return false;
         }
+        return true;
     }
 
 
@@ -230,21 +234,14 @@ class StarryMakeCommand extends GeneratorCommand
      */
     public function handle()
     {
-        // if(!$this->basicSetupImplemented()):
-        //     $this->error("Basic setup is not done for the starry.");
-        //     $this->info("Use Command \n php artisan starry:launch \n to make a basic setup.");
-        //     return;
-        // endif;
-
         if(!$this->basicSetupImplemented()):
 
             if ($this->confirm("Basic setup is not done for Starry. Do you want to setup it?", true)) {
                 $this->call('starry:launch');
-            }else{
+            }else {
                 return;
             }
             
-            return;
         endif;
 
         // First we need to ensure that the given name is not a reserved word within the PHP
@@ -256,27 +253,37 @@ class StarryMakeCommand extends GeneratorCommand
             return false;
         }
 
-        $name = $this->qualifyClass($this->getNameInput());
+        
+        $interface = $this->call("starry:interface", [
+            "name" => $this->getNameInput(),
+            !$this->option("model") ?: "-m" => $this->option("model")
+        ]);
+        
+        $this->call("starry:repo", [
+            "name" => $this->getNameInput()
+        ]);
 
-        $path = $this->getPath($name);
+
+        // $name = $this->qualifyClass($this->getNameInput());
+
+        // $path = $this->getPath($name);
 
         // Next, We will check to see if the class already exists. If it does, we don't want
         // to create the class and overwrite the user's code. So, we will bail out so the
         // code is untouched. Otherwise, we will continue generating this class' files.
-        if ((! $this->hasOption('force') ||
-             ! $this->option('force')) &&
-             $this->alreadyExists($this->getNameInput())) {
-            $this->error($this->type.' already exists!');
+        // if ((! $this->hasOption('force') ||
+        //      ! $this->option('force')) &&
+        //      $this->alreadyExists($this->getNameInput())) {
+        //     $this->error($this->type.' already exists!');
 
-            return false;
-        }
+        //     return false;
+        // }
 
         // Next, we will generate the path to the location where this class' file should get
         // written. Then, we will build the class and make the proper replacements on the
         // stub files so that it gets the correctly formatted namespace and class name.
-        $this->makeDirectory($path);
-
-        $this->files->put($path, $this->sortImports($this->buildClass($name)));
+        // $this->makeDirectory($path);
+        // $this->files->put($path, $this->sortImports($this->buildClass($name)));
 
         $this->info($this->type.' created successfully.');
 

@@ -3,15 +3,12 @@
 namespace {{ namespace }};
 
 use Illuminate\Database\Eloquent\Model;
-use {{ rootNamespace }}{{ BaseRepoPath }}\BaseRepository;
+use {{ BaseRepoPath }}\BaseRepository;
 
 class {{ class }} extends BaseRepository
 {
     /**
      * Display a listing of the resource.
-     *
-     * @param  \{{ namespacedParentModel }}  ${{ parentModelVariable }}
-     * @return \Illuminate\Http\Response
      */
     public function __construct(Model $model)
     {

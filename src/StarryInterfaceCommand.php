@@ -192,23 +192,28 @@ class StarryInterfaceCommand extends GeneratorCommand
                 "type" => "class",
             ],
         ];
-        foreach ($basicSetupClasses as $setup) {
-            switch ($setup["type"]) {
-                case 'interface':
-                    if (!interface_exists($setup["name"])) {
-                        return false;
-                    }
-                    break;
-                
-                default:
-                    if (!class_exists($setup["name"])) {
-                        return false;
-                    }
-                    break;
+        try {
+            foreach ($basicSetupClasses as $setup) {
+                switch ($setup["type"]) {
+                    case 'interface':
+                        if (!interface_exists($setup["name"])) {
+                            return false;
+                        }
+                        break;
+                    
+                    case "class":
+                        if (!class_exists($setup["name"])) {
+                            
+                            return false;
+                        }                   
+                        break;
+                }
             }
-
-            return true;
+        } catch (\Throwable $th) {
+            return false;
         }
+        
+        return true;
     }
 
     /**

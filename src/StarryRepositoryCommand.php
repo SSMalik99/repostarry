@@ -73,23 +73,28 @@ class StarryRepositoryCommand extends GeneratorCommand
                 "type" => "class",
             ],
         ];
-        foreach ($basicSetupClasses as $setup) {
-            switch ($setup["type"]) {
-                case 'interface':
-                    if (!interface_exists($setup["name"])) {
-                        return false;
-                    }
-                    break;
-                
-                default:
-                    if (!class_exists($setup["name"])) {
-                        return false;
-                    }
-                    break;
+        
+        try {
+            foreach ($basicSetupClasses as $setup) {
+                switch ($setup["type"]) {
+                    case 'interface':
+                        if (!interface_exists($setup["name"])) {
+                            return false;
+                        }
+                        break;
+                    
+                    case "class":
+                        if (!class_exists($setup["name"])) {
+                            
+                            return false;
+                        }                   
+                        break;
+                }
             }
-
-            return true;
+        } catch (\Throwable $th) {
+            return false;
         }
+        return true;
     }
 
 
@@ -116,7 +121,7 @@ class StarryRepositoryCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\\Repository\\'.config('starry.starry_repository_path');
+        return $rootNamespace.'\Repository\\'.config('starry.starry_repository_path');
     }
 
     /**
@@ -137,11 +142,20 @@ class StarryRepositoryCommand extends GeneratorCommand
             $replace = $this->buildModelReplacements();
         }
 
+        $replace = array_merge($replace, $this->buildBaseRepoReplacement());
         $replace["use {$repositoryNamespace}\Repository;\n"] = '';
 
         return str_replace(
             array_keys($replace), array_values($replace), parent::buildClass($name)
         );
+    }
+
+    protected function buildBaseRepoReplacement()
+    {
+        
+        return [
+            "{{ BaseRepoPath }}" => $this->rootNameSpace().'Repository\\'.config('starry.starry_repository_path')
+        ];
     }
     
     /**

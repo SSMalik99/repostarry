@@ -2,22 +2,10 @@
 
 namespace {{ namespace }};
 
-use {{ namespacedModel }};
-use {{ rootNamespace }}Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use {{ namespacedParentModel }};
 
-class {{ class }} extends BaseRepository
+use Illuminate\Support\Collection;
+
+interface UserRepositoryInterface
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @param  \{{ namespacedParentModel }}  ${{ parentModelVariable }}
-     * @return \Illuminate\Http\Response
-     */
-    public function __construct({{ parentModel }} ${{ parentModelVariable }})
-    {
-        //
-    }
-
+   public function all(): Collection;
 }
