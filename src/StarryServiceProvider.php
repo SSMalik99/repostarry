@@ -28,7 +28,8 @@ class StarryServiceProvider extends ServiceProvider
             $this->commands([
                 StarryInitCommand::class,
                 StarryMakeCommand::class,
-                StarryInterfaceCommand::class
+                StarryInterfaceCommand::class,
+                StarryRepositoryCommand::class
             ]);
         }
 

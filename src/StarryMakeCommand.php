@@ -9,7 +9,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 // use Illuminate\Console\Command;
 
-#[AsCommand(name: 'starry:repo')]
+#[AsCommand(name: 'make:starry')]
 class StarryMakeCommand extends GeneratorCommand
 {
 
@@ -21,7 +21,7 @@ class StarryMakeCommand extends GeneratorCommand
     *
     * @var string
     */
-    protected $name = 'starry:repo';
+    protected $name = 'make:starry';
 
     
     /**
@@ -34,7 +34,7 @@ class StarryMakeCommand extends GeneratorCommand
      * @deprecated
      */
     // protected $signature = 'make:starry';
-    protected static $defaultName = 'starry:repo';
+    protected static $defaultName = 'make:starry';
 
     /**
      * The console command description.
@@ -48,7 +48,7 @@ class StarryMakeCommand extends GeneratorCommand
      *
      * @var string
      */
-    protected $type = 'Repository';
+    protected $type = 'Starry';
 
     /**
      * Get the stub file for the generator.
@@ -230,12 +230,23 @@ class StarryMakeCommand extends GeneratorCommand
      */
     public function handle()
     {
+        // if(!$this->basicSetupImplemented()):
+        //     $this->error("Basic setup is not done for the starry.");
+        //     $this->info("Use Command \n php artisan starry:launch \n to make a basic setup.");
+        //     return;
+        // endif;
+
         if(!$this->basicSetupImplemented()):
-            $this->error("Basic setup is not done for the starry.");
-            $this->info("Use Command \n php artisan starry:launch \n to make a basic setup.");
+
+            if ($this->confirm("Basic setup is not done for Starry. Do you want to setup it?", true)) {
+                $this->call('starry:launch');
+            }else{
+                return;
+            }
+            
             return;
         endif;
-        
+
         // First we need to ensure that the given name is not a reserved word within the PHP
         // language and that the class name will actually be valid. If it is not valid we
         // can error now and prevent from polluting the filesystem using invalid files.

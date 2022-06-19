@@ -9,8 +9,8 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 // use Illuminate\Console\Command;
 
-#[AsCommand(name: 'starry:interface')]
-class StarryInterfaceCommand extends GeneratorCommand
+#[AsCommand(name: 'starry:repo')]
+class StarryRepositoryCommand extends GeneratorCommand
 {
 
     
@@ -21,7 +21,7 @@ class StarryInterfaceCommand extends GeneratorCommand
     *
     * @var string
     */
-    protected $name = 'starry:interface';
+    protected $name = 'starry:repo';
 
     
     /**
@@ -33,21 +33,22 @@ class StarryInterfaceCommand extends GeneratorCommand
      *
      * @deprecated
      */
-    protected static $defaultName = "starry:interface";
+    // protected $signature = 'starry:repo';
+    protected static $defaultName = 'starry:repo';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new interface for the repository';
+    protected $description = 'Create a new repository with interface';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'interface';
+    protected $type = 'Repository';
 
     /**
      * Get the stub file for the generator.
@@ -55,15 +56,53 @@ class StarryInterfaceCommand extends GeneratorCommand
      * @return string
      */
 
+
+    public function basicSetupImplemented()
+    {
+        $basicSetupClasses = [
+            [
+                "name" => "App\\Providers\\RepositoryServiceProvider",
+                "type" => "provider",
+            ],
+            [
+                "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
+                "type" => "interface",
+            ],
+            [
+                "name" => "App\\Repository\\".config('starry.starry_repository_path')."\\"."BaseRepository",
+                "type" => "class",
+            ],
+        ];
+        foreach ($basicSetupClasses as $setup) {
+            switch ($setup["type"]) {
+                case 'interface':
+                    if (!interface_exists($setup["name"])) {
+                        return false;
+                    }
+                    break;
+                
+                default:
+                    if (!class_exists($setup["name"])) {
+                        return false;
+                    }
+                    break;
+            }
+
+            return true;
+        }
+    }
+
+
+
     protected function getStub()
     {
-        $stub = null;
+        $stu = null;
         
         if ($this->option('model')) {
-            $stub = "/stubs/starry.interface.model.stub";
+            $stub = '/stubs/starry.repository.model.stub';
         }
 
-        $stub ??= "/stubs/starry.interface.stub";
+        $stub ??= '/stubs/starry.repository.stub';
 
         return $this->resolveStubPath($stub);
     }
@@ -77,7 +116,7 @@ class StarryInterfaceCommand extends GeneratorCommand
      */
     protected function getDefaultNamespace($rootNamespace)
     {
-        return $rootNamespace.'\\Repository\\'.config('starry.starry_interfaces_path');
+        return $rootNamespace.'\\Repository\\'.config('starry.starry_repository_path');
     }
 
     /**
@@ -90,7 +129,7 @@ class StarryInterfaceCommand extends GeneratorCommand
      */
     protected function buildClass($name)
     {
-        $interfaceNamespace = $this->getNamespace($name);
+        $repositoryNamespace = $this->getNamespace($name);
 
         $replace = [];
 
@@ -98,7 +137,7 @@ class StarryInterfaceCommand extends GeneratorCommand
             $replace = $this->buildModelReplacements();
         }
 
-        $replace["use {$interfaceNamespace}\Repository;\n"] = '';
+        $replace["use {$repositoryNamespace}\Repository;\n"] = '';
 
         return str_replace(
             array_keys($replace), array_values($replace), parent::buildClass($name)
@@ -175,41 +214,7 @@ class StarryInterfaceCommand extends GeneratorCommand
                         ? $customPath
                         : __DIR__.$stub;
     }
-    
-    public function basicSetupImplemented()
-    {
-        $basicSetupClasses = [
-            [
-                "name" => "App\\Providers\\RepositoryServiceProvider",
-                "type" => "provider",
-            ],
-            [
-                "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
-                "type" => "interface",
-            ],
-            [
-                "name" => "App\\Repository\\".config('starry.starry_repository_path')."\\"."BaseRepository",
-                "type" => "class",
-            ],
-        ];
-        foreach ($basicSetupClasses as $setup) {
-            switch ($setup["type"]) {
-                case 'interface':
-                    if (!interface_exists($setup["name"])) {
-                        return false;
-                    }
-                    break;
-                
-                default:
-                    if (!class_exists($setup["name"])) {
-                        return false;
-                    }
-                    break;
-            }
 
-            return true;
-        }
-    }
 
     /**
      * Execute the console command.
@@ -218,7 +223,6 @@ class StarryInterfaceCommand extends GeneratorCommand
      */
     public function handle()
     {
-        
         if(!$this->basicSetupImplemented()):
 
             if ($this->confirm("Basic setup is not done for Starry. Do you want to setup it?", true)) {
@@ -227,7 +231,6 @@ class StarryInterfaceCommand extends GeneratorCommand
                 return;
             }
             
-            return;
         endif;
 
         // First we need to ensure that the given name is not a reserved word within the PHP
