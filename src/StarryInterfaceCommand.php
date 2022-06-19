@@ -179,10 +179,10 @@ class StarryInterfaceCommand extends GeneratorCommand
     public function basicSetupImplemented()
     {
         $basicSetupClasses = [
-            [
-                "name" => "App\\Providers\\RepositoryServiceProvider",
-                "type" => "provider",
-            ],
+            // [
+            //     "name" => "App\\Providers\\RepositoryServiceProvider",
+            //     "type" => "provider",
+            // ],
             [
                 "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
                 "type" => "interface",

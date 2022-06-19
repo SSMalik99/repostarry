@@ -60,10 +60,10 @@ class StarryMakeCommand extends GeneratorCommand
     public function basicSetupImplemented()
     {
         $basicSetupClasses = [
-            [
-                "name" => "App\\Providers\\RepositoryServiceProvider",
-                "type" => "class",
-            ],
+            // [
+            //     "name" => "App\\Providers\\RepositoryServiceProvider",
+            //     "type" => "class",
+            // ],
             [
                 "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
                 "type" => "interface",

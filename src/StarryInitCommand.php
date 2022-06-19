@@ -8,11 +8,14 @@ use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 use Illuminate\Support\Facades\Storage;
+use Ssmalik99\Repostarry\Traits\BindingTrait;
 // use Illuminate\Console\Command;
 
 #[AsCommand(name: 'starry:launch')]
 class StarryInitCommand extends GeneratorCommand
 {
+
+    use BindingTrait;
     /**
      * The name and signature of the console command.
      *
@@ -119,13 +122,15 @@ class StarryInitCommand extends GeneratorCommand
      */
     public function handle()
     {
-        
+
+        // Publish the vendor
+
         $basicSetupClasses = [
-            [
-                "name" => "App\\Providers\\RepositoryServiceProvider",
-                "type" => "provider",
-                "stub" => $this->resolveStubPath("/stubs/starry.provider.stub")
-            ],
+            // [
+            //     "name" => "App\\Providers\\RepositoryServiceProvider",
+            //     "type" => "provider",
+            //     "stub" => $this->resolveStubPath("/stubs/starry.provider.stub")
+            // ],
             [
                 "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
                 
@@ -146,6 +151,10 @@ class StarryInitCommand extends GeneratorCommand
                 "stub" => $this->resolveStubPath("/stubs/starry.repository.base.stub")
             ],
             
+        ];
+
+        $basicBindings = [
+            "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface" => "App\\Repository\\".config('starry.starry_repository_path')."\\"."BaseRepository"
         ];
 
         foreach ($basicSetupClasses as $setup) {
@@ -169,9 +178,16 @@ class StarryInitCommand extends GeneratorCommand
         $this->line("Thanks for installing out package, you can also give us a star on github.");
         $this->info("Follow Link: https://github.com/SSMalik99/repostarry");
 
+        $this->call("vendor:publish", [
+            "--tag" => "starry-config"
+        ]);
+
+        $this->mergeBinding($basicBindings);
+
         // if (in_array(CreatesMatchingTest::class, class_uses_recursive($this))) {
         //     $this->handleTestCreation($path);
         // }
     }
+
 
 }
