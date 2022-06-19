@@ -5,7 +5,7 @@ namespace {{ namespace }};
 
 use Illuminate\Support\Collection;
 
-interface UserRepositoryInterface
+interface {{ interfaceName }}
 {
    public function all(): Collection;
 }

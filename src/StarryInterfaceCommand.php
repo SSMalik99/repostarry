@@ -35,6 +35,7 @@ class StarryInterfaceCommand extends GeneratorCommand
      */
     protected static $defaultName = "starry:interface";
 
+    protected $interfaceNameSpace, $interfaceName;
     /**
      * The console command description.
      *
@@ -97,7 +98,7 @@ class StarryInterfaceCommand extends GeneratorCommand
         if ($this->option('model')) {
             $replace = $this->buildModelReplacements();
         }
-
+        $replace = array_merge($replace, $this->buildInterfaceReplacement());
         $replace["use {$interfaceNamespace}\Repository;\n"] = '';
 
         return str_replace(
@@ -147,6 +148,14 @@ class StarryInterfaceCommand extends GeneratorCommand
             'DummyModelVariable' => lcfirst(class_basename($modelClass)),
             '{{ modelVariable }}' => lcfirst(class_basename($modelClass)),
             '{{modelVariable}}' => lcfirst(class_basename($modelClass)),
+        ];
+    }
+
+    protected function buildInterfaceReplacement()
+    {
+        return [
+            "{{ interfaceNameSapce }}" => $this->interfaceNameSpace,
+            "{{ interfaceName }}" => $this->interfaceName
         ];
     }
 
@@ -245,6 +254,10 @@ class StarryInterfaceCommand extends GeneratorCommand
         }
 
         $name = $this->qualifyClass($this->getNameInput());
+        
+        $this->interfaceName = $this->getNameInput();
+        $this->interfaceNameSpace = $name;
+
         $path = $this->getPath($name);
         
         // Next, We will check to see if the class already exists. If it does, we don't want

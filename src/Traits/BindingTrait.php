@@ -20,11 +20,15 @@ trait BindingTrait
 
         $stub = $this->resolveStubPath("/stubs/starry.config.stub");
         
-        $bindingString = "";
+        $bindingString = "'bindings' => [";
         
         foreach ($content as $interface => $repository) {
             $bindingString .= "\t\\" . $interface . "::class => \\" . $repository . "::class,\n";
         }
+
+        $bindingString .= "],";
+
+        dd($bindingString);
 
         $stub = str_replace('{{ bindings }}', $bindingString, $stub);
         dd($stub);
