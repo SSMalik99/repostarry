@@ -19,7 +19,8 @@ class StarryServiceProvider extends ServiceProvider
         $bindings = config('starry.bindings', []);
 
         foreach ($bindings as $interface => $repository) {
-             $this->app->singleton(
+            
+            $this->app->bind(
                 $interface,
                 $repository
             );

@@ -14,7 +14,7 @@ return [
     * Path where we want to store out interfaces *
     * ********************************************
     */
-    'starry_interfaces_path' => env("STARRY_INTERFACES_PATH", "Interfaces"),
+    'starry_interfaces_path' => env("STARRY_INTERFACES_PATH", "Interface"),
 
     /*
     * ********************************************
