@@ -16,16 +16,14 @@ class StarryServiceProvider extends ServiceProvider
     public function register()
     {
         
-        // $path = base_path()."\\app\\Repository";
-        // $allFiles = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path));
-        
-        // $phpFiles = new \RegexIterator($allFiles, '/\.php$/');
-        // dd($phpFiles);
-        // dd(get_declared_classes());
-      
-        // foreach($files as $file){
-        //     // $this->app->bind($file::class, $file::class);
-        // }
+        $bindings = config('starry.bindings', []);
+
+        foreach ($bindings as $interface => $repository) {
+             $this->app->singleton(
+                $interface,
+                $repository
+            );
+        }
     }
 
     /**
