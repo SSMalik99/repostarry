@@ -118,88 +118,6 @@ class StarryMakeCommand extends GeneratorCommand
         // ];
     }
 
-    
-    /**
-     * Get the default namespace for the class.
-     *
-     * @param  string  $rootNamespace
-     * @return string
-     */
-    protected function getDefaultNamespace($rootNamespace)
-    {
-        return $rootNamespace.'\\Repository\\'.config('starry.starry_repository_path');
-    }
-
-    /**
-     * Build the class with the given name.
-     *
-     * Remove the base controller import if we are already in the base namespace.
-     *
-     * @param  string  $name
-     * @return string
-     */
-    protected function buildClass($name)
-    {
-        $repositoryNamespace = $this->getNamespace($name);
-
-        $replace = [];
-
-        if ($this->option('model')) {
-            $replace = $this->buildModelReplacements();
-        }
-
-        $replace["use {$repositoryNamespace}\Repository;\n"] = '';
-
-        return str_replace(
-            array_keys($replace), array_values($replace), parent::buildClass($name)
-        );
-    }
-    
-    /**
-     * Get the fully-qualified model class name.
-     *
-     * @param  string  $model
-     * @return string
-     *
-     * @throws \InvalidArgumentException
-     */
-    protected function parseModel($model)
-    {
-        if (preg_match('([^A-Za-z0-9_/\\\\])', $model)) {
-            throw new InvalidArgumentException('Model name contains invalid characters.');
-        }
-
-        return $this->qualifyModel($model);
-    }
-
-
-    /**
-     * Build the model replacement values.
-     *
-     * @param  array  $replace
-     * @return array
-     */
-    protected function buildModelReplacements()
-    {
-        $modelClass = $this->parseModel($this->option('model'));
-
-        if (! class_exists($modelClass) && $this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true)) {
-            $this->call('make:model', ['name' => $modelClass]);
-        }
-
-        return [
-            'DummyFullModelClass' => $modelClass,
-            '{{ namespacedModel }}' => $modelClass,
-            '{{namespacedModel}}' => $modelClass,
-            'DummyModelClass' => class_basename($modelClass),
-            '{{ model }}' => class_basename($modelClass),
-            '{{model}}' => class_basename($modelClass),
-            'DummyModelVariable' => lcfirst(class_basename($modelClass)),
-            '{{ modelVariable }}' => lcfirst(class_basename($modelClass)),
-            '{{modelVariable}}' => lcfirst(class_basename($modelClass)),
-        ];
-    }
-
     /**
      * Get the console command options.
      *
@@ -213,18 +131,7 @@ class StarryMakeCommand extends GeneratorCommand
         ];
     }
 
-    /**
-     * Resolve the fully-qualified path to the stub.
-     *
-     * @param  string  $stub
-     * @return string
-     */
-    protected function resolveStubPath($stub)
-    {
-        return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
-                        ? $customPath
-                        : __DIR__.$stub;
-    }
+
 
 
     /**
@@ -239,7 +146,7 @@ class StarryMakeCommand extends GeneratorCommand
             if ($this->confirm("Basic setup is not done for Starry. Do you want to setup it?", true)) {
                 $this->call('starry:launch');
             }else {
-                return;
+                return false;
             }
             
         endif;
@@ -253,39 +160,28 @@ class StarryMakeCommand extends GeneratorCommand
             return false;
         }
 
+        $input = $this->getNameInput();
+
+        $repositoryName = str_contains($input, "Repository") ? $input : $input."Repository";
         
-        $interface = $this->call("starry:interface", [
-            "name" => $this->getNameInput(),
-            !$this->option("model") ?: "-m" => $this->option("model")
-        ]);
         
-        $this->call("starry:repo", [
-            "name" => $this->getNameInput()
+        $repository = $this->call("starry:repo", [
+            "name" => $repositoryName,
+            !$this->option("model") ?: "-m" => $this->option("model"),
+            !$this->option('force') ?: "--force" => true
         ]);
 
+        if($repository):
+            
+            $this->info($this->type.' created successfully.');
+            return true;
 
-        // $name = $this->qualifyClass($this->getNameInput());
+        endif;
 
-        // $path = $this->getPath($name);
-
-        // Next, We will check to see if the class already exists. If it does, we don't want
-        // to create the class and overwrite the user's code. So, we will bail out so the
-        // code is untouched. Otherwise, we will continue generating this class' files.
-        // if ((! $this->hasOption('force') ||
-        //      ! $this->option('force')) &&
-        //      $this->alreadyExists($this->getNameInput())) {
-        //     $this->error($this->type.' already exists!');
-
-        //     return false;
-        // }
-
-        // Next, we will generate the path to the location where this class' file should get
-        // written. Then, we will build the class and make the proper replacements on the
-        // stub files so that it gets the correctly formatted namespace and class name.
-        // $this->makeDirectory($path);
-        // $this->files->put($path, $this->sortImports($this->buildClass($name)));
-
-        $this->info($this->type.' created successfully.');
+        $this->error("please check above error.");
+        return false;
+        
+        
 
         // if (in_array(CreatesMatchingTest::class, class_uses_recursive($this))) {
         //     $this->handleTestCreation($path);

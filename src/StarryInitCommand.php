@@ -89,14 +89,14 @@ class StarryInitCommand extends GeneratorCommand
 
     protected function baseInterfaceName($interface)
     {
-        return config('starry.starry_interfaces_path')."\\".$interface;
+        return $this->rootNamespace()."Repository\\".config('starry.starry_interfaces_path')."\\".$interface;
     }
 
     protected function replaceInterface(&$stub, $interfaceName)
     {
         // []
         $searches = [
-            ['{{ $interfaceName }}', '{{ $baseInterfaceName }}']
+            ['{{ interfaceName }}', '{{ interfaceNameSapce }}']
         ];
 
         foreach ($searches as $search) {

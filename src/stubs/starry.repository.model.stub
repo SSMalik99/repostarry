@@ -3,21 +3,29 @@
 namespace {{ namespace }};
 
 use {{ namespacedModel }};
-use {{ rootNamespace }}Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use {{ namespacedParentModel }};
+use {{ interfaceNameSapce }};
+use Illuminate\Support\Collection;
+use {{ BaseRepoPath }}\BaseRepository;
 
-class {{ class }} extends BaseRepository
+class {{ class }} extends BaseRepository implements {{ interfaceName }}
 {
+    protected $model;
+
     /**
      * Display a listing of the resource.
      *
-     * @param  \{{ namespacedParentModel }}  ${{ parentModelVariable }}
-     * @return \Illuminate\Http\Response
+     * @param  \{{ model }}  ${{ modelVariable }}
+     * 
      */
-    public function __construct({{ parentModel }} ${{ parentModelVariable }})
+    public function __construct({{ model }} ${{ modelVariable }})
     {
-        //
+        $this->model = ${{ modelVariable }};
+    }
+
+    
+    public function all()  : Collection
+    {
+        return $this->model->all();
     }
 
 }

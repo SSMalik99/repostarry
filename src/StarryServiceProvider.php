@@ -3,6 +3,7 @@
 namespace Ssmalik99\Repostarry;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Storage;
 
 class StarryServiceProvider extends ServiceProvider
 {
@@ -13,7 +14,11 @@ class StarryServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // dd(get_declared_classes());
+      
+        // foreach($files as $file){
+        //     // $this->app->bind($file::class, $file::class);
+        // }
     }
 
     /**

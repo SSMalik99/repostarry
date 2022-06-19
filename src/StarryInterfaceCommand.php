@@ -212,7 +212,7 @@ class StarryInterfaceCommand extends GeneratorCommand
         } catch (\Throwable $th) {
             return false;
         }
-        
+
         return true;
     }
 
@@ -245,9 +245,8 @@ class StarryInterfaceCommand extends GeneratorCommand
         }
 
         $name = $this->qualifyClass($this->getNameInput());
-
         $path = $this->getPath($name);
-
+        
         // Next, We will check to see if the class already exists. If it does, we don't want
         // to create the class and overwrite the user's code. So, we will bail out so the
         // code is untouched. Otherwise, we will continue generating this class' files.
@@ -255,7 +254,6 @@ class StarryInterfaceCommand extends GeneratorCommand
              ! $this->option('force')) &&
              $this->alreadyExists($this->getNameInput())) {
             $this->error($this->type.' already exists!');
-
             return false;
         }
 
@@ -271,6 +269,8 @@ class StarryInterfaceCommand extends GeneratorCommand
         // if (in_array(CreatesMatchingTest::class, class_uses_recursive($this))) {
         //     $this->handleTestCreation($path);
         // }
+        
+        return true;
     }
 
 

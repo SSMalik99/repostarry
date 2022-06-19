@@ -2,6 +2,7 @@
 
 namespace Ssmalik99\Repostarry;
 
+use Illuminate\Support\Str;
 use Illuminate\Console\Concerns\CreatesMatchingTest;
 use Illuminate\Console\GeneratorCommand;
 use InvalidArgumentException;
@@ -23,7 +24,7 @@ class StarryRepositoryCommand extends GeneratorCommand
     */
     protected $name = 'starry:repo';
 
-    
+    protected $interfaceNameSpace, $interfaceName;
     /**
      * The name of the console command.
      *
@@ -142,12 +143,25 @@ class StarryRepositoryCommand extends GeneratorCommand
             $replace = $this->buildModelReplacements();
         }
 
-        $replace = array_merge($replace, $this->buildBaseRepoReplacement());
+        $replace = array_merge(
+                $replace,
+                $this->buildBaseRepoReplacement(), 
+                $this->buildInterfaceReplacement()
+            );
+
         $replace["use {$repositoryNamespace}\Repository;\n"] = '';
 
         return str_replace(
             array_keys($replace), array_values($replace), parent::buildClass($name)
         );
+    }
+
+    protected function buildInterfaceReplacement()
+    {
+        return [
+            "{{ interfaceNameSapce }}" => $this->interfaceNameSpace,
+            "{{ interfaceName }}" => $this->interfaceName
+        ];
     }
 
     protected function buildBaseRepoReplacement()
@@ -229,6 +243,21 @@ class StarryRepositoryCommand extends GeneratorCommand
                         : __DIR__.$stub;
     }
 
+    protected function qualifyInterfaceClass($name)
+    {
+        $name = ltrim($name, '\\/');
+
+        $name = str_replace('/', '\\', $name);
+
+        $rootNamespace = $this->rootNamespace();
+
+        if (Str::startsWith($name, $rootNamespace)) {
+            return $name;
+        }
+
+        return trim($rootNamespace, '\\').'\\Repository\\'.config('starry.starry_interfaces_path')."\\".$name;
+    }
+
 
     /**
      * Execute the console command.
@@ -256,33 +285,43 @@ class StarryRepositoryCommand extends GeneratorCommand
             return false;
         }
 
-        $name = $this->qualifyClass($this->getNameInput());
+        $this->interfaceName = str_contains($this->getNameInput(), "Interface") ? $this->getNameInput() : $this->getNameInput()."Interface";
 
-        $path = $this->getPath($name);
+        $this->interfaceNameSpace = $this->qualifyInterfaceClass($this->interfaceName);
+        
+        $interfaceCreated = $this->call("starry:interface", [
+            "name" => $this->interfaceName,
+            !$this->option("model") ?: "-m" => $this->option("model"),
+            !$this->option('force') ?: "--force" => true,
+        ]);
+        
+        if($interfaceCreated):
 
-        // Next, We will check to see if the class already exists. If it does, we don't want
-        // to create the class and overwrite the user's code. So, we will bail out so the
-        // code is untouched. Otherwise, we will continue generating this class' files.
-        if ((! $this->hasOption('force') ||
-             ! $this->option('force')) &&
-             $this->alreadyExists($this->getNameInput())) {
-            $this->error($this->type.' already exists!');
+            $name = $this->qualifyClass($this->getNameInput());
+            $path = $this->getPath($name);
 
+            if ((! $this->hasOption('force') ||
+                ! $this->option('force')) &&
+                $this->alreadyExists($this->getNameInput())) {
+                $this->error($this->type.' already exists!');
+
+                return false;
+            }
+
+            $this->makeDirectory($path);
+            $this->files->put($path, $this->sortImports($this->buildClass($name)));
+            $this->info($this->type.' created successfully.');
+
+            
+            // if (in_array(CreatesMatchingTest::class, class_uses_recursive($this))) {
+            //     $this->handleTestCreation($path);
+            // }
+        else:
+            $this->warn("You probably entered wrong input");
             return false;
-        }
+        endif;
 
-        // Next, we will generate the path to the location where this class' file should get
-        // written. Then, we will build the class and make the proper replacements on the
-        // stub files so that it gets the correctly formatted namespace and class name.
-        $this->makeDirectory($path);
-
-        $this->files->put($path, $this->sortImports($this->buildClass($name)));
-
-        $this->info($this->type.' created successfully.');
-
-        // if (in_array(CreatesMatchingTest::class, class_uses_recursive($this))) {
-        //     $this->handleTestCreation($path);
-        // }
+        return true;
     }
 
 
