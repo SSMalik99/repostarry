@@ -9,12 +9,14 @@ use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
 // use Illuminate\Console\Command;
+use Ssmalik99\Repostarry\Traits\BindingTrait;
+
 
 #[AsCommand(name: 'starry:repo')]
 class StarryRepositoryCommand extends GeneratorCommand
 {
 
-    
+    use BindingTrait;
     // use CreatesMatchingTest;
 
     /*
@@ -312,7 +314,11 @@ class StarryRepositoryCommand extends GeneratorCommand
             $this->files->put($path, $this->sortImports($this->buildClass($name)));
             $this->info($this->type.' created successfully.');
 
-            
+            $bindings = [
+                "{$this->interfaceNameSpace}" => "$name"
+            ];
+
+            $this->mergeBinding($bindings);
             // if (in_array(CreatesMatchingTest::class, class_uses_recursive($this))) {
             //     $this->handleTestCreation($path);
             // }

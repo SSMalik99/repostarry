@@ -19,7 +19,8 @@ trait BindingTrait
         $content = array_merge($content, $bindings);
 
         $stub = $this->resolveStubPath("/stubs/starry.config.stub");
-        
+         $stub = $this->files->get($stub);
+
         $bindingString = "'bindings' => [";
         
         foreach ($content as $interface => $repository) {
@@ -28,10 +29,9 @@ trait BindingTrait
 
         $bindingString .= "],";
 
-        dd($bindingString);
-
         $stub = str_replace('{{ bindings }}', $bindingString, $stub);
-        dd($stub);
+        // dd($stub, $bindingString, file_exists($filePath));
+        // file_exists($filePath);
         $this->files->put($filePath, $stub);
         
     }
