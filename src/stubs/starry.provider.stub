@@ -1,0 +1,25 @@
+<?php
+
+namespace {{ namespace }};
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Storage;
+
+
+class RepositoryServiceProvider extends ServiceProvider
+{
+    /** 
+    * Register services. 
+    * 
+    * @return void  
+    */ 
+   public function register() 
+   { 
+       // register here
+       // $files = Storage::allFiles($directory);
+
+       // foreach($files as $file){
+       //  $this->app->bind($file::class, $file::class);
+       // }
+   }
+}

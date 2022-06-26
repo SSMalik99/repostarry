@@ -1,0 +1,11 @@
+<?php
+
+namespace {{ namespace }};
+
+
+use Illuminate\Support\Collection;
+
+interface {{ interfaceName }}
+{
+   public function all(): Collection;
+}

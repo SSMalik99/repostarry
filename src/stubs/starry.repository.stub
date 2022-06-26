@@ -1,0 +1,28 @@
+<?php
+
+namespace {{ namespace }};
+
+use {{ interfaceNameSapce }};
+use Illuminate\Database\Eloquent\Model;
+use {{ BaseRepoPath }}\BaseRepository;
+
+use Illuminate\Support\Collection;
+
+class {{ class }} extends BaseRepository implements {{ interfaceName }}
+{
+    /**
+     * Display a listing of the resource.
+     */
+    public function __construct(Model $model)
+    {
+        $this->model = $model;
+    }
+
+
+    
+    public function all()  : Collection
+    {
+        return $this->model->all();
+    }
+
+}
