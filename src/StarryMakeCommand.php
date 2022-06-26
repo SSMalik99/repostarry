@@ -199,12 +199,12 @@ class StarryMakeCommand extends GeneratorCommand
 
         // interface check
         if($this->alreadyExists($this->interfaceNameSpace) && !$this->force ){
-            throw new Exception("{$this->interfaceNameSpace} already exists, use force flag -f to overwrite.", 1);
+            throw new Exception("{$this->interfaceNameSpace} already exists, use force flag to overwrite.", 1);
         }
 
         // repository check
         if($this->alreadyExists($this->repositoryNameSpace) && !$this->force ){
-            throw new Exception("{$this->repositoryNameSpace} already exists, use force flag -f to overwrite.", 1);
+            throw new Exception("{$this->repositoryNameSpace} already exists, use force flag to overwrite.", 1);
         }
 
     }

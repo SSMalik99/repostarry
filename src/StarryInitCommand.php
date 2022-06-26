@@ -113,7 +113,6 @@ class StarryInitCommand extends GeneratorCommand
         return $this;
     }
 
-    
 
     /**
      * Execute the console command.
@@ -122,6 +121,18 @@ class StarryInitCommand extends GeneratorCommand
      */
     public function handle()
     {
+        if($this->basicSetupImplemented()):
+
+            if ($this->confirm("Basic setup already done, if you run this commmand again this will set starry to the default setup?", false)) {
+
+                $this->deleteBasicSetupFiles();
+                $this->warn("Starry  is reverted to the default setting.");
+
+            }else {
+                return false;
+            }
+            
+        endif;
 
         // Publish the vendor
 
