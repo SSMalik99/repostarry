@@ -21,6 +21,10 @@ return [
     * Where We want to store our main repository *
     * ********************************************
     */
-    "starry_repository_path" => env("STARRY_REPOSITORY_PATH", "Eloquent")
+    "starry_repository_path" => env("STARRY_REPOSITORY_PATH", "Eloquent"),
+
+    'bindings' => [],
+
+
 
 ];
