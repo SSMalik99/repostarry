@@ -20,7 +20,47 @@ php artisan starry:launch
 
 This command will launch a basic setup for the starry and publish a config file ```starry.php``` to manage configration of starry package.
 
-Basic setup will create 
+#### Change Configration
+
+If you want to use other folder structure than you can change this by changing the ```.env``` variables
+
+
+###### If we followed the default setup then this config file will appear
+```
+<?php
+
+return [
+
+    /*
+    * ***************************************
+    * Which data model our project is using *
+    * ***************************************
+    */
+    "starry_data_model" => env('STARRY_DATA_MODEL', "Eloquent"),
+
+    /*
+    * ********************************************
+    * Path where we want to store out interfaces *
+    * ********************************************
+    */
+    'starry_interfaces_path' => env("STARRY_INTERFACES_PATH", "StarryInterfaces"),
+
+    /*
+    * ********************************************
+    * Where We want to store our main repository *
+    * ********************************************
+    */
+    "starry_repository_path" => env("STARRY_REPOSITORY_PATH", "Eloquent"),
+
+    'bindings' => [
+		\App\Repository\StarryInterfaces\EloquentRepositoryInterface::class => \App\Repository\Eloquent\BaseRepository::class,
+
+	],
+];
+
+```
+
+Initially Starry will follow this structure according to the above configration.
 ```
 ---App
 ------Repository
@@ -29,6 +69,8 @@ Basic setup will create
 ----------------StarryInterfaces(Default Setup)
 ----------------------------------------------EloquentRepositoryInterface.php(Default Setup)
 ```
+
+All repositories other than the default one will extend the ```BaseRepository``` just to reduce the code. 
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
