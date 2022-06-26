@@ -126,11 +126,6 @@ class StarryInitCommand extends GeneratorCommand
         // Publish the vendor
 
         $basicSetupClasses = [
-            // [
-            //     "name" => "App\\Providers\\RepositoryServiceProvider",
-            //     "type" => "provider",
-            //     "stub" => $this->resolveStubPath("/stubs/starry.provider.stub")
-            // ],
             [
                 "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
                 
@@ -182,11 +177,8 @@ class StarryInitCommand extends GeneratorCommand
             "--tag" => "starry-config"
         ]);
 
-        $this->mergeBinding($basicBindings);
+        $this->mergeConfigBinding($basicBindings);
 
-        // if (in_array(CreatesMatchingTest::class, class_uses_recursive($this))) {
-        //     $this->handleTestCreation($path);
-        // }
     }
 
 

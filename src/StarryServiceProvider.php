@@ -38,9 +38,7 @@ class StarryServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 StarryInitCommand::class,
-                StarryMakeCommand::class,
-                StarryInterfaceCommand::class,
-                StarryRepositoryCommand::class
+                StarryMakeCommand::class
             ]);
         }
 

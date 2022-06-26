@@ -7,7 +7,8 @@ namespace Ssmalik99\Repostarry\Traits;
  */
 trait BindingTrait
 {
-    public function mergeBinding(array $bindings = [])
+    
+    public function mergeConfigBinding(array $bindings = [])
     {
         $filePath = config_path('starry.php');
         $content = config('starry.bindings');
@@ -24,7 +25,7 @@ trait BindingTrait
         $bindingString = "'bindings' => [";
         
         foreach ($content as $interface => $repository) {
-            $bindingString .= "\t\\" . $interface . "::class => \\" . $repository . "::class,\n";
+            $bindingString .= "\n\t\\" . $interface . "::class => \\" . $repository . "::class,\n\n";
         }
 
         $bindingString .= "],";
@@ -34,5 +35,42 @@ trait BindingTrait
         // file_exists($filePath);
         $this->files->put($filePath, $stub);
         
+    }
+
+
+    public function basicSetupImplemented()
+    {
+        $basicSetupClasses = [
+            [
+                "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
+                "type" => "interface",
+            ],
+            [
+                "name" => "App\\Repository\\".config('starry.starry_repository_path')."\\"."BaseRepository",
+                "type" => "class",
+            ],
+        ];
+        
+        try {
+            foreach ($basicSetupClasses as $setup) {
+                switch ($setup["type"]) {
+                    case 'interface':
+                        if (!interface_exists($setup["name"])) {
+                            return false;
+                        }
+                        break;
+                    
+                    case "class":
+                        if (!class_exists($setup["name"])) {
+                            
+                            return false;
+                        }                   
+                        break;
+                }
+            }
+        } catch (\Throwable $th) {
+            return false;
+        }
+        return true;
     }
 }

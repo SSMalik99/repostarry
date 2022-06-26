@@ -7,7 +7,10 @@ use Illuminate\Console\GeneratorCommand;
 use InvalidArgumentException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputOption;
-// use Illuminate\Console\Command;
+use Ssmalik99\Repostarry\Traits\BindingTrait;
+use Symfony\Component\Console\Input\InputArgument;
+use Illuminate\Support\Str;
+use Exception;
 
 #[AsCommand(name: 'starry:make')]
 class StarryMakeCommand extends GeneratorCommand
@@ -15,6 +18,7 @@ class StarryMakeCommand extends GeneratorCommand
 
     
     // use CreatesMatchingTest;
+    use BindingTrait;
 
     /*
     * Command name
@@ -23,7 +27,6 @@ class StarryMakeCommand extends GeneratorCommand
     */
     protected $name = 'starry:make';
 
-    
     /**
      * The name of the console command.
      *
@@ -50,72 +53,41 @@ class StarryMakeCommand extends GeneratorCommand
      */
     protected $type = 'Starry';
 
+    protected $repositoryNameSpace, $repositoryName, $model, $force, $interfaceNameSpace, $interfaceName;
+
     /**
      * Get the stub file for the generator.
      *
      * @return string
      */
-
-
-    public function basicSetupImplemented()
-    {
-        $basicSetupClasses = [
-            // [
-            //     "name" => "App\\Providers\\RepositoryServiceProvider",
-            //     "type" => "class",
-            // ],
-            [
-                "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
-                "type" => "interface",
-            ],
-            [
-                "name" => "App\\Repository\\".config('starry.starry_repository_path')."\\"."BaseRepository",
-                "type" => "class",
-            ],
-        ];
-        try {
-            foreach ($basicSetupClasses as $setup) {
-                switch ($setup["type"]) {
-                    case 'interface':
-                        if (!interface_exists($setup["name"])) {
-                            return false;
-                        }
-                        break;
-                    
-                    case "class":
-                        if (!class_exists($setup["name"])) {
-                            
-                            return false;
-                        }                   
-                        break;
-                }
-            }
-        } catch (\Throwable $th) {
-            return false;
-        }
-        return true;
-    }
-
-
-
     protected function getStub()
     {
         $repositoryStub = null;
         $interfaceStup = null;
         
-        if ($this->option('model')) {
-            $repositoryStub = '/stubs/starry.repository.model.stub';
-            $interfaceStup = "/stubs/starry.interface.model.stub";
-        }
+        // As model is required we changed this to the direct stub
+        $repositoryStub = '/stubs/starry.repository.model.stub';
+        $interfaceStup = "/stubs/starry.interface.model.stub";
 
-        $repositoryStub ??= '/stubs/starry.repository.stub';
-        $interfaceStup ??= "/stubs/starry.interface.stub";
-
+        
         return $this->resolveStubPath($repositoryStub);
         // return [
         //     "repositoryStub" => $this->resolveStubPath($repositoryStub),
         //     "interfaceStup" => $this->resolveStubPath($interfaceStup)
         // ];
+    }
+
+    /**
+     * Get the console command arguments.
+     *
+     * @return array
+     */
+    protected function getArguments()
+    {
+        return [
+            ['name', InputArgument::REQUIRED, 'The name of the class'],
+            ['model', InputArgument::REQUIRED, 'Generate a resource repository for the given model.']
+        ];
     }
 
     /**
@@ -126,13 +98,121 @@ class StarryMakeCommand extends GeneratorCommand
     protected function getOptions()
     {
         return [
-            ['force', null, InputOption::VALUE_NONE, 'Create the class even if the repository already exists'],
-            ['model', 'm', InputOption::VALUE_OPTIONAL, 'Generate a resource repository for the given model.']
+            ['force', null, InputOption::VALUE_NONE, 'Create the class even if the repository already exists']
         ];
     }
 
+    /**
+     * Check whether model is available or not
+     * it will also execute the command to make a model
+    */
+    protected function checkModelAvailability()
+    {
+        $modelClass = $this->parseModel($this->model);
+        
+        
+        if ( !class_exists($modelClass) ) {
+            
+            if($this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true)) {
+                
+                $this->call('make:model', ['name' => $modelClass]);
+                return true;
+
+            }else{
+
+                return false;
+            }
+            
+        }
+
+        return true;
+
+    }
+
+    /**
+     * Build model replacements for the stub files
+     */
+    protected function buildModelReplacements()
+    {
+        $modelClass = $this->parseModel($this->model);
+
+        // if (! class_exists($modelClass) && $this->confirm("A {$modelClass} model does not exist. Do you want to generate it?", true)) {
+        //     $this->call('make:model', ['name' => $modelClass]);
+        // }
+
+        return [
+            'DummyFullModelClass' => $modelClass,
+            '{{ namespacedModel }}' => $modelClass,
+            '{{namespacedModel}}' => $modelClass,
+            'DummyModelClass' => class_basename($modelClass),
+            '{{ model }}' => class_basename($modelClass),
+            '{{model}}' => class_basename($modelClass),
+            'DummyModelVariable' => lcfirst(class_basename($modelClass)),
+            '{{ modelVariable }}' => lcfirst(class_basename($modelClass)),
+            '{{modelVariable}}' => lcfirst(class_basename($modelClass)),
+        ];
+    }
+
+    /**
+     * Build Base repository replacements for the stub files
+     */
+    protected function buildBaseRepoReplacement()
+    {
+        return [
+            "{{ BaseRepoPath }}" => $this->rootNameSpace().'Repository\\'.config('starry.starry_repository_path')
+        ];
+    }
+
+    /**
+     * Build interface replacements for the stub files
+     */
+    protected function buildInterfaceReplacement()
+    {
+        return [
+            "{{ interfaceNameSapce }}" => $this->interfaceNameSpace,
+            "{{ interfaceName }}" => $this->interfaceName
+        ];
+    }
+
+    protected function parseModel($model)
+    {
+        if (preg_match('([^A-Za-z0-9_/\\\\])', $model)) {
+            throw new InvalidArgumentException('Model name contains invalid characters.');
+        }
+
+        return $this->qualifyModel($model);
+    }
 
 
+    /**
+     * Main function to check the validation to make things batter
+     * Starry function
+    */
+    public function starryPermission()
+    {
+        // Check Model Availability
+        if( !$this->checkModelAvailability() )
+        {
+            throw new Exception("{$this->model} doesn't exists, please create one", 1);
+            
+        }
+
+        // interface check
+        if($this->alreadyExists($this->interfaceNameSpace) && !$this->force ){
+            throw new Exception("{$this->interfaceNameSpace} already exists, use force flag -f to overwrite.", 1);
+        }
+
+        // repository check
+        if($this->alreadyExists($this->repositoryNameSpace) && !$this->force ){
+            throw new Exception("{$this->repositoryNameSpace} already exists, use force flag -f to overwrite.", 1);
+        }
+
+    }
+
+    protected function alreadyExists( $starryNameSpace )
+    {
+        return $this->files->exists( $this->getPath( $starryNameSpace ) );
+    }
 
     /**
      * Execute the console command.
@@ -151,41 +231,176 @@ class StarryMakeCommand extends GeneratorCommand
             
         endif;
 
-        // First we need to ensure that the given name is not a reserved word within the PHP
-        // language and that the class name will actually be valid. If it is not valid we
-        // can error now and prevent from polluting the filesystem using invalid files.
+
         if ($this->isReservedName($this->getNameInput())) {
             $this->error('The name "'.$this->getNameInput().'" is reserved by PHP.');
-
             return false;
         }
 
         $input = $this->getNameInput();
-
-        $repositoryName = str_contains($input, "Repository") ? $input : $input."Repository";
         
-        
-        $repository = $this->call("starry:repo", [
-            "name" => $repositoryName,
-            !$this->option("model") ?: "-m" => $this->option("model"),
-            !$this->option('force') ?: "--force" => true
-        ]);
+        $this->repositoryName = str_contains($input, "Repository") ? $input : $input."Repository";
+        $this->repositoryNameSpace =  $this->qualifyRepositoryClass($this->repositoryName);
 
-        if($repository):
+        $this->model = trim($this->argument('model'));
+        $this->force = $this->option('force');
+
+        $this->interfaceName = str_contains($this->repositoryName, "Interface") ? $this->repositoryName : $this->repositoryName."Interface";
+        $this->interfaceNameSpace = $this->qualifyInterfaceClass($this->interfaceName);
+
+        try {
             
-            $this->info($this->type.' created successfully.');
-            return true;
+            $this->starryPermission();
+            $this->starryMakeRepository();
+            
+            
+            $this->mergeConfigBinding(
+                [
+                    "{$this->interfaceNameSpace}" => "{$this->repositoryNameSpace}"
+                ]
+            );
 
-        endif;
 
-        $this->error("please check above error.");
-        return false;
+
+        } catch (\Throwable $th) {
+
+            $this->error($th->getMessage());
+            return false;
+        }
+
+        $this->info('Starry created successfully.');
+        return true;
+
+    }
+
+    /**
+     * ******************************************
+     * REPOSITORY CREATION METHODS
+     * 
+     * ******************************************
+     * */
+
+    protected function qualifyRepositoryClass($name)
+    {
+        $name = ltrim($name, '\\/');
+
+        $name = str_replace('/', '\\', $name);
+
+        $rootNamespace = $this->rootNamespace();
+
+        if (Str::startsWith($name, $rootNamespace)) {
+            return $name;
+        }
+
+        return trim($rootNamespace, '\\').'\\Repository\\'.config('starry.starry_data_model')."\\".$name;
+    }
+
+    protected function qualifyInterfaceClass($name)
+    {
+        $name = ltrim($name, '\\/');
+
+        $name = str_replace('/', '\\', $name);
+
+        $rootNamespace = $this->rootNamespace();
+
+        if (Str::startsWith($name, $rootNamespace)) {
+            return $name;
+        }
+
+        return trim($rootNamespace, '\\').'\\Repository\\'.config('starry.starry_interfaces_path')."\\".$name;
+    }
+
+    protected function resolveStubPath($stub)
+    {
+        return file_exists($customPath = $this->laravel->basePath(trim($stub, '/')))
+                        ? $customPath
+                        : __DIR__.$stub;
+    }
+
+    public function buildRepositoryClass()
+    {
+        $stub = $this->files->get($this->resolveStubPath('/stubs/starry.repository.model.stub'));
+
+        $repositoryNamespace = $this->getNamespace($this->repositoryNameSpace);
+
+        $replace = $this->buildModelReplacements();
+
+        $replace = array_merge(
+                $replace,
+                $this->buildBaseRepoReplacement(), 
+                $this->buildInterfaceReplacement()
+            );
+
+        $replace["use {$repositoryNamespace}\Repository;\n"] = '';
+        
+        $stubRelation = $this->replaceNamespace($stub, $this->repositoryNameSpace)->replaceClass($stub, $this->repositoryNameSpace);
+
+        return str_replace(
+            array_keys($replace), array_values($replace), $stubRelation
+        );
+    }
+
+    public function buildInterfaceClass()
+    {
+        $stub = $this->files->get($this->resolveStubPath("/stubs/starry.interface.model.stub"));
+
+        $interfaceNamespace = $this->getNamespace($this->interfaceNameSpace);
+
+        $replace = $this->buildModelReplacements();
+
+        $replace = array_merge($replace, $this->buildInterfaceReplacement());
+
+        $replace["use {$interfaceNamespace}\Repository;\n"] = '';
+
+        $stubRelation = $this->replaceNamespace($stub, $this->interfaceNameSpace)->replaceClass($stub, $this->interfaceNameSpace);
+
+        return str_replace(
+            array_keys($replace), array_values($replace), $stubRelation
+        );
+    }
+
+    public function starryMakeRepository()
+    {   
+
+        $this->starryMakeInterface();
+        
+        $path = $this->getPath($this->repositoryNameSpace);
+
+        $this->makeDirectory($path);
+
+        $this->files->put($path, $this->sortImports($this->buildRepositoryClass()));
+
+        $this->info('Repository created successfully.');
+
+        // $bindings = [
+        //     "{$this->interfaceNameSpace}" => "{$this->repositoryNameSpace}"
+        // ];
+
+        // $this->mergeConfigBinding($bindings);
+
+        return true;
+    }
+
+    public function starryMakeInterface()
+    {
         
         
 
-        // if (in_array(CreatesMatchingTest::class, class_uses_recursive($this))) {
-        //     $this->handleTestCreation($path);
+        $path = $this->getPath($this->interfaceNameSpace);
+        
+        // if ( !$this->force && $this->alreadyExists($this->getNameInput())) {
+        //     $this->error('Interface already exists!');
+        //     return false;
         // }
+
+        $this->makeDirectory($path);
+
+        $this->files->put($path, $this->sortImports($this->buildInterfaceClass()));
+
+        $this->info('Interface created successfully.');
+
+        return true;
+
     }
 
 
