@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Illuminate\Support\Str;
 use Exception;
 
-#[AsCommand(name: 'starry:make')]
+#[AsCommand(name: 'make:starry')]
 class StarryMakeCommand extends GeneratorCommand
 {
 
@@ -25,7 +25,7 @@ class StarryMakeCommand extends GeneratorCommand
     *
     * @var string
     */
-    protected $name = 'starry:make';
+    protected $name = 'make:starry';
 
     /**
      * The name of the console command.
@@ -36,8 +36,8 @@ class StarryMakeCommand extends GeneratorCommand
      *
      * @deprecated
      */
-    // protected $signature = 'starry:make';
-    protected static $defaultName = 'starry:make';
+    // protected $signature = 'make:starry';
+    protected static $defaultName = 'make:starry';
 
     /**
      * The console command description.
@@ -85,8 +85,10 @@ class StarryMakeCommand extends GeneratorCommand
     protected function getArguments()
     {
         return [
-            ['name', InputArgument::REQUIRED, 'The name of the class'],
-            ['model', InputArgument::REQUIRED, 'Generate a resource repository for the given model.']
+            ['name', InputArgument::REQUIRED, 'The name of the model class'],
+
+            // Get only model name
+            // ['model', InputArgument::REQUIRED, 'Generate a resource repository for the given model.']
         ];
     }
 
@@ -230,19 +232,19 @@ class StarryMakeCommand extends GeneratorCommand
             }
             
         endif;
-
+        
+        $this->model = trim($this->argument('name'));
+        $input = $this->model; //$this->getNameInput();
 
         if ($this->isReservedName($this->getNameInput())) {
             $this->error('The name "'.$this->getNameInput().'" is reserved by PHP.');
             return false;
         }
 
-        $input = $this->getNameInput();
-        
         $this->repositoryName = str_contains($input, "Repository") ? $input : $input."Repository";
         $this->repositoryNameSpace =  $this->qualifyRepositoryClass($this->repositoryName);
 
-        $this->model = trim($this->argument('model'));
+        
         $this->force = $this->option('force');
 
         $this->interfaceName = str_contains($this->repositoryName, "Interface") ? $this->repositoryName : $this->repositoryName."Interface";

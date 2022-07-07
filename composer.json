@@ -17,23 +17,19 @@
     },
     "authors": [
         {
-            "name": "Kamaljeet Kaur",
-            "role": "Sr. Manager"
-        },
-        {
-            "name": "Preeti Gupta",
-            "role": "Manager"
-        },
-        {
-            "name": "Sajeed Kannoje",
-            "role": "Developer|QA Engineer"
-        },
-        {
             "name": "Saravjeet Singh",
             "email": "saravjeetsingh.malik@gmail.com",
             "role": "Developer"
+        },
+        {
+            "name": "Kamaljeet Kaur"
+        },
+        {
+            "name": "Preeti Gupta"
+        },
+        {
+            "name": "Sajeed Kannoje"
         }
-        
     ],
     "minimum-stability": "dev",
     "require": {}

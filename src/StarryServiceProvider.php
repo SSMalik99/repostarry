@@ -19,11 +19,14 @@ class StarryServiceProvider extends ServiceProvider
         $bindings = config('starry.bindings', []);
 
         foreach ($bindings as $interface => $repository) {
+            if (interface_exists($interface) && class_exists($repository)) :
             
-            $this->app->bind(
-                $interface,
-                $repository
-            );
+                $this->app->bind(
+                    $interface,
+                    $repository
+                );
+                
+            endif;
         }
     }
 

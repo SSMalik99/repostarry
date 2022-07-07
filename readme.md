@@ -22,7 +22,7 @@ This command will launch a basic setup for the starry and publish a config file 
 
 #### Change Configration
 
-If you want to use other folder structure than you can change this by changing the ```.env``` variables
+If you want to use other folder structure then you can change this by changing the ```.env``` variables
 
 
 ###### If we followed the default setup then this config file will appear
@@ -71,6 +71,38 @@ Initially Starry will follow this structure according to the above configration.
 ```
 
 All repositories other than the default one will extend the ```BaseRepository``` just to reduce the code. 
+
+
+### Create your Starry
+
+```bash
+php artisan make:starry model_name
+```
+This command required a ```model_name``` for which you want to create repository and interface
+
+#### For Instance
+
+```bash
+php artisan make:starry User
+```
+This will create ```UserRepositoryInterface```, ```UserRepository``` and bind them to our laravel app.
+
+### Binding
+
+##### How binding actually work for starry?
+
+In ```starry.php``` inside our config folder we have our all bindings.
+
+```
+    'bindings' => [
+      \App\Repository\StarryInterfaces\EloquentRepositoryInterface::class => \App\Repository\Eloquent\BaseRepository::class,
+
+    ],
+```
+
+So if you have created your Repository manually and you want to bind this with the help of ```starry```
+simply add your ```interface``` as the ```key``` and ```repository_class``` as ```value``` 
+for the element in ```bindings``` array
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
