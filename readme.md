@@ -4,7 +4,7 @@ Starry is a small package for creating a standard repository system in Laravel(P
 
 ## Installation
 
-Intall via composer
+Install via composer
 
 ```bash
 composer require ssmalik99/repostarry
