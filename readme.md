@@ -4,10 +4,10 @@ Starry is a small package for creating a standard repository system in Laravel(P
 
 ## Installation
 
-TODO
+Intall via composer
 
 ```bash
-TODO
+composer require ssmalik99/repostarry
 ```
 
 ## Usage
@@ -100,7 +100,7 @@ In ```starry.php``` inside our config folder we have our all bindings.
     ],
 ```
 
-So if you have created your Repository manually and you want to bind this with the help of ```starry```
+So if you have created your Repository manually and you want to bind this with the help of ```starry```, 
 simply add your ```interface``` as the ```key``` and ```repository_class``` as ```value``` 
 for the element in ```bindings``` array
 
