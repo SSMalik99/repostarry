@@ -18,9 +18,9 @@ composer require ssmalik99/repostarry
 php artisan starry:launch
 ```
 
-This command will launch a basic setup for the starry and publish a config file ```starry.php``` to manage configration of starry package.
+This command will launch a basic setup for the starry and publish a config file ```starry.php``` to manage configuration of starry package.
 
-#### Change Configration
+#### Change configuration
 
 If you want to use other folder structure then you can change this by changing the ```.env``` variables
 
@@ -60,7 +60,7 @@ return [
 
 ```
 
-Initially Starry will follow this structure according to the above configration.
+Initially Starry will follow this structure according to the above configuration.
 ```
 ---App
 ------Repository
