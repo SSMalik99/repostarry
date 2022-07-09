@@ -8,6 +8,11 @@
             "Ssmalik99\\Repostarry\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Ssmalik99\\Repostarry\\Tests\\" : "tests/"
+        }
+    },
     "extra": {
         "laravel" : {
             "providers" : [
@@ -33,6 +38,7 @@
     ],
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "require": {}
-
+    "require-dev": {
+        "orchestra/testbench": "^7.6"
+    }
 }

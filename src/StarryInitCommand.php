@@ -121,8 +121,8 @@ class StarryInitCommand extends GeneratorCommand
      */
     public function handle()
     {
+        
         if($this->basicSetupImplemented()):
-
             if ($this->confirm("Basic setup already done, if you run this commmand again this will set starry to the default setup?", false)) {
 
                 $this->deleteBasicSetupFiles();
@@ -135,7 +135,6 @@ class StarryInitCommand extends GeneratorCommand
         endif;
 
         // Publish the vendor
-
         $basicSetupClasses = [
             [
                 "name" => "App\\Repository\\".config('starry.starry_interfaces_path')."\\".config('starry.starry_data_model')."RepositoryInterface",
@@ -189,6 +188,8 @@ class StarryInitCommand extends GeneratorCommand
         ]);
 
         $this->mergeConfigBinding($basicBindings);
+
+        return true;
 
     }
 

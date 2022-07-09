@@ -96,4 +96,9 @@ trait BindingTrait
         
         $this->files->replace(config_path('starry.php'), $stub);
     }
+
+    public function findMeTest()
+    {
+        return $this->option('test');
+    }
 }

@@ -100,7 +100,8 @@ class StarryMakeCommand extends GeneratorCommand
     protected function getOptions()
     {
         return [
-            ['force', null, InputOption::VALUE_NONE, 'Create the class even if the repository already exists']
+            ['force', null, InputOption::VALUE_NONE, 'Create the class even if the repository already exists'],
+            ['test', null, InputOption::VALUE_OPTIONAL, 'Only requried during testing']
         ];
     }
 
@@ -111,7 +112,6 @@ class StarryMakeCommand extends GeneratorCommand
     protected function checkModelAvailability()
     {
         $modelClass = $this->parseModel($this->model);
-        
         
         if ( !class_exists($modelClass) ) {
             
@@ -198,7 +198,7 @@ class StarryMakeCommand extends GeneratorCommand
             throw new Exception("{$this->model} doesn't exists, please create one", 1);
             
         }
-
+        
         // interface check
         if($this->alreadyExists($this->interfaceNameSpace) && !$this->force ){
             throw new Exception("{$this->interfaceNameSpace} already exists, use force flag to overwrite.", 1);
@@ -223,16 +223,21 @@ class StarryMakeCommand extends GeneratorCommand
      */
     public function handle()
     {
-        if(!$this->basicSetupImplemented()):
-
-            if ($this->confirm("Basic setup is not done for Starry. Do you want to setup it?", true)) {
-                $this->call('starry:launch');
-            }else {
-                return false;
-            }
-            
-        endif;
+        $test = $this->findMeTest();
         
+        if($test !== "starryTestingTestManuall"):
+        
+            if(!$this->basicSetupImplemented()):
+
+                if ($this->confirm("Basic setup is not done for Starry. Do you want to setup it?", true)) {
+                    $this->call('starry:launch');
+                }else {
+                    return false;
+                }
+                
+            endif;
+        endif;
+
         $this->model = trim($this->argument('name'));
         $input = $this->model; //$this->getNameInput();
 
@@ -254,7 +259,6 @@ class StarryMakeCommand extends GeneratorCommand
             
             $this->starryPermission();
             $this->starryMakeRepository();
-            
             
             $this->mergeConfigBinding(
                 [
@@ -363,7 +367,7 @@ class StarryMakeCommand extends GeneratorCommand
 
     public function starryMakeRepository()
     {   
-
+        
         $this->starryMakeInterface();
         
         $path = $this->getPath($this->repositoryNameSpace);
@@ -387,7 +391,7 @@ class StarryMakeCommand extends GeneratorCommand
     {
         
         
-
+        
         $path = $this->getPath($this->interfaceNameSpace);
         
         // if ( !$this->force && $this->alreadyExists($this->getNameInput())) {
